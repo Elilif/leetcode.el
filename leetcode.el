@@ -1265,7 +1265,9 @@ major mode by `leetcode-prefer-language'and `auto-mode-alist'."
                           (goto-char (point-min))
                           (search-forward (string-trim template-code) nil t))
                   (insert template-code))
-                (leetcode--replace-in-buffer "" ""))))
+                (leetcode--replace-in-buffer "" "")))
+          (with-current-buffer code-buf
+            (leetcode-solution-mode t)))
 
         (display-buffer code-buf
                         '((display-buffer-reuse-window
