@@ -1173,7 +1173,8 @@ Call `leetcode-solve-problem' on the current problem id."
             (leetcode--kill-buff-and-delete-window (get-buffer (leetcode--detail-buffer-name problem-id)))
             (leetcode--kill-buff-and-delete-window (get-buffer (leetcode--result-buffer-name problem-id)))
             (leetcode--kill-buff-and-delete-window (get-buffer (leetcode--testcase-buffer-name problem-id)))))
-        leetcode--problem-titles))
+        leetcode--problem-titles)
+  (setq leetcode--problem-titles nil))
 
 (defun leetcode--set-lang (snippets)
   "Set `leetcode--lang' based on langSlug in SNIPPETS."
