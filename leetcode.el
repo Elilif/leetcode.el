@@ -1036,7 +1036,7 @@ will show the detail in other window and jump to it."
                         "likes: " (number-to-string .likes) html-margin
                         "dislikes: " (number-to-string .dislikes)))
         (insert .content)
-        (setq shr-current-font t)
+        ;; (setq shr-current-font t)
         (leetcode--replace-in-buffer "" "")
         ;; NOTE: shr.el can't render "https://xxxx.png", so we use "http"
         (leetcode--replace-in-buffer "https" "http")
