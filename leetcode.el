@@ -550,7 +550,7 @@ USER-AND-PROBLEMS is an alist comes from
                        :status .status
                        :id .stat.frontend_question_id
                        :backend-id .stat.question_id
-                       :title .stat.question__title
+                       :title (string-replace "'" "" .stat.question__title)
                        :acceptance (format
                                     "%.1f%%"
                                     (* 100
