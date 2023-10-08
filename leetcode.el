@@ -175,12 +175,22 @@ The object with following attributes:
   "LeetCode programming language or sql for current problem internally.
 Default is programming language.")
 
+(defvar leetcode--description-window nil
+  "(Internal) Holds the reference to description window.")
+
+(defvar leetcode--testcase-window nil
+  "(Internal) Holds the reference to testcase window.")
+
+(defvar leetcode--result-window nil
+  "(Internal) Holds the reference to result window.")
+
 (defconst leetcode--lang-suffixes
   '(("c" . ".c") ("cpp" . ".cpp") ("csharp" . ".cs")
+    ("dart" . ".dart") ("elixir" . ".ex") ("erlang" . ".erl")
     ("golang" . ".go") ("java" . ".java") ("javascript" . ".js")
-    ("typescript" . ".ts") ("kotlin" . ".kt") ("php" . ".php")
-    ("python" . ".py") ("python3" . ".py") ("ruby" . ".rb")
-    ("rust" . ".rs") ("scala" . ".scala") ("swift" . ".swift")
+    ("kotlin" . ".kt") ("php" . ".php") ("python" . ".py") ("python3" . ".py")
+    ("racket" . ".rkt") ("ruby" . ".rb") ("rust" . ".rs")
+    ("scala" . ".scala") ("swift" . ".swift") ("typescript" . ".ts")
     ("mysql" . ".sql") ("mssql" . ".sql") ("oraclesql" . ".sql"))
   "LeetCode programming language suffixes.
 c, cpp, csharp, golang, java, javascript, typescript, kotlin, php, python,
@@ -879,11 +889,11 @@ LeetCode require slug-title as the request parameters."
 |               |    Result      |
 +---------------+----------------+"
   (delete-other-windows)
-  (split-window-horizontally)
+  (setq leetcode--description-window (split-window-horizontally))
   (other-window 1)
-  (split-window-below)
+  (setq leetcode--testcase-window (split-window-below))
   (other-window 1)
-  (split-window-below)
+  (setq leetcode--result-window (split-window-below))
   (other-window -1)
   (other-window -1))
 
@@ -1035,7 +1045,8 @@ will show the detail in other window and jump to it."
         (insert (concat (capitalize difficulty) html-margin
                         "likes: " (number-to-string .likes) html-margin
                         "dislikes: " (number-to-string .dislikes)))
-        (insert .content)
+        ;; Sometimes LeetCode don't have a '<p>' at the outermost...
+        (insert "<p>" .content "</p>")
         (setq shr-current-font t)
         (leetcode--replace-in-buffer "" "")
         ;; NOTE: shr.el can't render "https://xxxx.png", so we use "http"
@@ -1061,7 +1072,8 @@ will show the detail in other window and jump to it."
                               'help-echo "Open the problem solution page in browser."))
         (rename-buffer buf-name)
         (leetcode--problem-detail-mode)
-        (switch-to-buffer (current-buffer))))))
+        (switch-to-buffer (current-buffer))
+        (search-backward "Solve it")))))
 
 (aio-defun leetcode-show-problem (problem-id)
   "Show the detail of problem with id PROBLEM-ID.
@@ -1275,16 +1287,10 @@ major mode by `leetcode-prefer-language'and `auto-mode-alist'."
       (with-current-buffer (get-buffer-create testcase-buf-name)
         (erase-buffer)
         (insert testcase)
-        (display-buffer (current-buffer)
-                        '((display-buffer-reuse-window
-                           leetcode--display-testcase)
-                          (reusable-frames . visible))))
+        (set-window-buffer leetcode--testcase-window (current-buffer)))
       (with-current-buffer (get-buffer-create result-buf-name)
         (erase-buffer)
-        (display-buffer (current-buffer)
-                        '((display-buffer-reuse-window
-                           leetcode--display-result)
-                          (reusable-frames . visible)))))))
+        (set-window-buffer leetcode--result-window (current-buffer))))))
 
 (aio-defun leetcode-restore-layout ()
   "This command should be run in LeetCode code buffer.
@@ -1352,6 +1358,14 @@ It will restore the layout based on current buffer's name."
   "Set `evil-normal-state-local-map' to MAP."
   (when (featurep 'evil)
     (define-key map "h" nil)
+    (define-key map "v" nil)
+    (define-key map "V" nil)
+    (define-key map "b" nil)
+    (define-key map "B" nil)
+    (define-key map "g" nil)
+    (define-key map "G" nil)
+    (define-key map "z" #'leetcode-refresh)
+    (define-key map "Z" #'leetcode-refresh-fetch)
     (setq evil-normal-state-local-map map)))
 
 (add-hook 'leetcode--problems-mode-hook #'hl-line-mode)
@@ -1406,7 +1420,7 @@ It will restore the layout based on current buffer's name."
 (define-minor-mode leetcode-solution-mode
   "Minor mode to provide shortcut and hooks."
   :require 'leetcode
-  :lighter "LC Solution"
+  :lighter " LC-Solution"
   :group 'leetcode
   :keymap leetcode-solution-mode-map)
 
